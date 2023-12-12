@@ -1,0 +1,170 @@
+.data 
+addd: 	.asciz "ADD: "
+subb: 	.asciz "SUB: "
+msk: 	.asciz "MASK: "
+s_ll: 	.asciz "SLL("
+s_rl: 	.asciz "SRL("
+conc: 	.asciz "): "
+quest1:  .asciz "Digite dois numeros\n"
+quest2:  .asciz "Digite qual função deseja utilizar (add = 1, sub = 2, mask = 3, sll = 4 ou srl = 5)\n"
+quest3:  .asciz "Digite um numero para fazer mascara\n"
+
+.text
+
+main:
+	la a0, quest1 #prompt digite dois numeros
+	li a7, 4
+	ecall 
+	
+	li a7, 5 #ler primeiro numero 
+	ecall 
+	
+	mv t0, a0
+	
+	li a7, 5 #ler segundo numero
+	ecall
+	
+	mv t1, a0 #move o retorno da função para o registrador t1
+	
+
+while:
+	la a0, quest2 #prompt
+	li a7, 4 
+	ecall
+	
+	li a7, 5 #le int do teclado
+	ecall
+	
+	mv t4, a0 #salva o valor de a0 em t4
+	
+	li t3, 1 #load immediate t3 = 1
+	beq t4, t3, soma #if t4 = 1 goto soma
+	
+	li t3, 2 #load immediate t3 = 2
+	beq t4,t3, subt # if t4 = 2 goto subt 
+	
+	li t3, 3
+	beq t4, t3, mask
+	
+	li t3, 4
+	beq t4, t3, sll_
+	
+	li t3, 5
+	beq t4, t3, srl_
+	
+	j while
+soma: 
+	la a0, addd 
+	li a7, 4 #print soma =
+	ecall 
+	
+	add a0, t0, t1 #executa soma
+	
+	li a7, 1 #print resultado
+	ecall
+	
+	j end_prog
+subt: 
+	la a0, subb
+	li a7, 4
+	ecall
+	
+	sub a0, t0, t1 #executa subtração
+	
+	li a7, 1 #print resultado
+	ecall
+	
+	j end_prog
+mask:
+	la a0, quest3 #prompt
+	li a7, 4
+	ecall
+	
+	li a7, 5 #leitura do terceiro numero
+	ecall
+	
+	mv t0, a0 #move a0 para t0
+	
+	la a0, msk #load address mask em a0
+	li a7, 4 #print string
+	ecall
+	
+	li t1, 31 #load immediate t1 = 31
+	
+	and a0, t0, t1 #mascara entre t0 e 31
+	
+	li a7, 1 #print int
+	ecall
+	
+	j end_prog
+sll_: 
+	la a0, quest3 #prompt
+	li a7, 4
+	ecall
+	
+	li a7, 5 #leitura do terceiro numero
+	ecall
+	
+	mv t3, a0
+	
+	la a0, s_ll
+	li a7, 4
+	ecall
+	
+	li t1, 31 #load immediate t1 = 31
+	
+	and a0, t3, t1 #mascara entre t3 e 31
+	
+	li a7, 1 #print int
+	ecall
+	
+	la a0, conc
+	li a7, 4
+	ecall 
+	
+	and a0, t3, t1 #mascara entre t3 e 31
+	
+	sll a0, t0, a0 #shift left logical (numero da mascara) posições
+	
+	li a7, 1
+	ecall
+	
+	j end_prog
+srl_:
+	la a0, quest3 #prompt
+	li a7, 4
+	ecall
+	
+	li a7, 5 #leitura do terceiro numero
+	ecall
+	
+	mv t3, a0
+	
+	la a0, s_rl
+	li a7, 4
+	ecall
+	
+	li t1, 31 #load immediate t1 = 31
+	
+	and a0, t3, t1 #mascara entre t3 e 31
+	
+	li a7, 1 #print int
+	ecall
+	
+	la a0, conc
+	li a7, 4
+	ecall 
+	
+	and a0, t3, t1 #mascara entre t3 e 31
+	
+	srl a0, t0, a0 #shift right logical (numero da mascara) posições
+	
+	li a7, 1
+	ecall	
+	
+end_prog:
+	
+	li a7, 10 #encerra programa
+	ecall
+	
+	

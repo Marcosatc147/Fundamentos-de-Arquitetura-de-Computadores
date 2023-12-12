@@ -1,0 +1,95 @@
+.data
+newline: .asciz "\n"
+sigp: .asciz "+"
+sign: .asciz "-"
+infinity_msg: .asciz "Infinity"
+
+.text
+.globl main
+main:
+    # Solicitar entrada para o número de ponto flutuante
+    li a7, 6            # Syscall para sys_read_float
+    ecall
+
+    # Salvar o número de ponto flutuante no registrador f0
+    fmv.s f0, fa0
+
+    # Imprimir o número real
+    li a7, 2  
+    ecall
+
+    la a0, newline
+    li a7, 4
+    ecall
+    
+    # Extrair o sinal
+    fmv.x.w t0, f0  # Copia o valor do sinal para t0
+    srli t0, t0, 31  # Remove os bits de sinal e mantissa
+    beqz t0, positivo
+    la a0, sign
+    li a7, 4
+    ecall
+    j continua_main_1
+    
+positivo:
+    la a0, sigp
+    li a7, 4
+    ecall
+       
+continua_main_1:
+                        
+    la a0, newline
+    li a7, 4
+    ecall
+
+    # Extrair o expoente
+    fmv.x.w t0, f0  # Copia o valor do expoente para t0
+    srli t0, t0, 23  # Remove os bits de sinal e mantissa
+    li t1, 127
+
+    # Verifique se é "Infinity" (expoente 255) e ajuste para 128
+    li t2, 255
+    beq t0, t2, print_infinity
+
+    sub t0, t0, t1
+    bgt t0, t1, sub_excesso  # Comparar com 127 (valor máximo permitido)
+    j continua_main_2
+
+print_infinity:
+    li t0, 128
+    j continua_main_2
+
+sub_excesso:
+    li t2, 128
+    sub t0, t0, t2  # Subtrair 128 para ajustar o expoente
+    bgt t0, t1, sub_excesso
+
+continua_main_2:
+    # Imprimir o expoente
+    mv a0, t0  
+
+    li a7, 1  
+    ecall
+
+    la a0, newline
+    li a7, 4
+    ecall
+
+    # Extrair a mantissa
+    li t1, 0x7FFFFF  # Máscara para a mantissa (23 bits)
+    fmv.x.w t2, f0  # Copia o valor da mantissa para t2
+    and t2, t2, t1  # Aplicar a máscara para obter a mantissa
+
+    # Converter a mantissa para hexadecimal
+    li a7, 34  # Syscall para sys_write_hex
+    mv a0, t2  # Valor da mantissa em a0
+    mv a1, a0  # Número de dígitos (usar o mesmo valor que a0)
+    ecall
+
+    la a0, newline
+    li a7, 4
+    ecall
+
+    # Encerrar o programa
+    li a7, 10  
+    ecall

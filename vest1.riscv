@@ -1,0 +1,52 @@
+.data
+gabarito: .asciz "World"
+respostas: .asciz "World"
+newline: .asciz "\n"
+
+.text
+.globl _start
+
+_start:
+    # Inicialize os ponteiros para as strings
+    la t0, gabarito
+    la t1, respostas
+
+    # Inicialize o contador
+    li t2, 0
+
+for:
+    # Carregue os caracteres das strings
+    lb a0, 0(t0)
+    lb a1, 0(t1)
+
+    # Se chegou ao final de uma das strings, encerre o loop
+    beqz a0, endprog
+    beqz a1, endprog
+
+    # Compare os caracteres
+    beq a0, a1, increment_counter
+
+continue_loop:
+    # Avance os ponteiros e continue o loop
+    addi t0, t0, 1
+    addi t1, t1, 1
+    j for
+
+increment_counter:
+    # Incremente o contador
+    addi t2, t2, 1
+
+    # Avance os ponteiros e continue o loop
+    addi t0, t0, 1
+    addi t1, t1, 1
+    j for
+
+endprog:
+    # Imprima o valor do contador
+    mv a0, t2
+    li a7, 1
+    ecall
+
+    # Termina o programa
+    li a7, 10
+    ecall

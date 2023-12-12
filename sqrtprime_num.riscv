@@ -1,0 +1,85 @@
+.data
+newline: 	.asciz "\n"
+invalid_entry: 	.asciz "Entrada invalida."
+sim: 	.asciz "sim"
+nao: 	.asciz 	"nao"
+
+.text
+main:
+	li a7, 5 #read int
+	ecall
+	
+	mv t0, a0 # t0 = numero a verificar
+	
+	fcvt.s.w f0, t0 # converte int para float 
+	
+	blez t0, invalid #se a entrada for <= 0
+	
+	fsqrt.s fa0, f0 # operacao raiz quadrada 
+	# rne = round to nearest
+	# Round towards Zero RTZ
+	# Round Down (towards ??) RDN
+	# Round Up (towards +?) RUP
+	# Round to Nearest, ties to Max Magnitude RMM
+	
+	fcvt.w.s a0, fa0, rdn  # converte float para inteiro
+
+	mv t1, a0 # t1 = raiz arredondada
+	
+	li a1, 1 # a1 = 1
+	
+	li t2, 2 # t2 = 2 -> i
+	li a2, 2
+	li a3, 3
+	
+	beq t0, a1, not_prime # se for 1, n é primo
+	beq t0, t2, prime # se for = 2 é primo
+	beq t0, a3, prime # se for = 3 
+	
+for:
+	rem t3, t0, t2 # t3 = mod entre num e i
+	beqz t3, not_prime # se modulo = 0, n é primo
+	bge t2, t1, prime # se chega na raiz, n existe divisor
+	
+	addi t2, t2, 1 # t2 = t2 + 1
+for1: 	
+	rem t4, t2, a2 # modulo entre t2 e 2
+	beqz t4, it # se o modulo de t2 e  for = 0, pula 
+	
+	j for
+	
+it: #pula os números pares, exceto o 2 
+	addi t2, t2, 1 # t2 = t2 + 1
+	j for
+		
+prime:
+	#é primo
+	la a0, sim
+	li a7, 4
+	ecall
+	
+	j endprog
+
+not_prime:
+	#n é primo
+	la a0, nao
+	li a7, 4
+	ecall 
+	
+	j endprog
+
+invalid:
+	# entrada invalida
+	la a0, invalid_entry
+	li a7, 4
+	ecall
+	
+endprog:
+	la a0, newline
+	li a7, 4
+	ecall
+	
+	#encerrar
+	li a7 10
+	ecall
+	

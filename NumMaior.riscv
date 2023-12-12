@@ -1,0 +1,62 @@
+.data
+newline: .asciz "\n"
+
+.text
+.globl main
+main:
+    # Solicitar a quantidade de números a serem lidos
+    li a7, 5 # Chamada do sistema para ler inteiro
+    ecall
+
+    # Salvar a quantidade de números em t0
+    mv t0, a0
+
+    # Inicializar o maior número com um valor inicial
+    li a7, 5 # Chamada do sistema para ler inteiro
+    ecall
+    mv t1, a0
+
+    # Inicializar o contador
+    li t2, 1
+
+read_loop:
+    # Verificar se todos os números foram lidos
+    beq t2, t0, exit_program
+
+    # Ler o próximo número
+    li a7, 5 # Chamada do sistema para ler inteiro
+    ecall
+
+    # Comparar o número lido com o maior número encontrado até agora
+    bge a0, t1, update_max
+
+    # Atualizar o contador
+    addi t2, t2, 1
+
+    # Continuar lendo os números
+    j read_loop
+
+update_max:
+    # Atualizar o maior número
+    mv t1, a0
+
+    # Atualizar o contador
+    addi t2, t2, 1
+
+    # Continuar lendo os números
+    j read_loop
+
+exit_program:
+    # Imprimir o maior número
+    mv a0, t1
+    li a7, 1 # Chamada do sistema para escrever inteiro
+    ecall
+
+    la a0, newline
+    li a7, 4		
+    ecall
+
+    # Encerrar o programa com um código de saída 0
+    li a7, 10 # Chamada do sistema para encerrar
+    ecall
+

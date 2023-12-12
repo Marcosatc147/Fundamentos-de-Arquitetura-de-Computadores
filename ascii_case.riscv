@@ -1,0 +1,172 @@
+.data
+newline: 	.string "\n"
+buffer: 	.space 10
+
+.text
+main:
+	#lê a opção
+	li a7, 12
+	la a0, buffer
+	ecall
+	mv s0, a0
+	#lbu s0, buffer #s0 opçao
+	
+	jal line
+	
+	#lê o tamanho da string
+	li a7, 5 
+	ecall
+	
+	mv a1, a0 #seta o tamanho da string
+	
+	#aloca memoria e recebe a string
+	li a7, 9 #sbrk
+	addi a0, s1, 1            # Número de bytes de memória para alocar.
+	addi a1, a1, 1 #a1 + 1
+	ecall
+	mv s2, a0
+	
+	#read string
+	li a7, 8
+	mv a0, s2
+	ecall
+	
+	mv s2, a0 #s2 = string
+	
+	jal line
+	
+	#t3 = m em ascii
+	li t3, 109
+	#t4 = M em ascii
+	li t4, 77
+	#t5 = c em ascii
+	li t5, 99
+	
+	#range das maiusculas
+	li a3, 'A'
+	li a4, 'Z'
+	
+	#range das minusculas
+	li a5, 'a'
+	li a6, 'z'
+	
+	#branch if
+	beq s0, t3, to_lower # = m
+	beq s0, t4, to_upper # = M
+	beq s0, t5, first_letter # = c
+	
+	j endprog
+to_lower:
+	add t0, t0, zero # Iterador do loop (i).
+	add t1, s2, zero #endereço string
+	
+    	li t0, 0         # Iterador do loop (i).
+    	#li t1, 0         # Endereço do caractere de string atual.
+    	
+    	loop_tl:
+	#ponteiro 
+	lbu t2, 0(t1)
+
+	#se for minuscula
+	blt t2, a3, is_lower
+	bgt t2, a4, is_lower
+	#else
+		#converte maiuscula para minuscula
+		addi t2, t2, 32 
+		sb t2, 0(t1) #armazena de volta no endereço
+	is_lower:
+		addi t0, t0, 1 #adiciona 1 no contador 
+		
+		bge t0, a1, endprog # cont>=i
+		
+		addi t1, t1, 1 #adiciona no ponteiro 
+		
+		j loop_tl
+to_upper:
+	add t0, t0, zero
+	add t1, s2, zero #endereço string
+	
+    	li t0, 0         # Iterador do loop (i).
+    	#li t1, 0         # Endereço do caractere de string atual.
+    	
+    	loop_tu:
+	#ponteiro 
+	lbu t2, 0(t1)
+		
+	#se for maiuscula
+	blt t2, a5, is_upper
+	bgt t2, a6, is_upper
+	#else
+		#converte maiuscula para minuscula
+		addi t2, t2, -32 
+		sb t2, 0(t1) #armazena de volta no endereço
+	is_upper:
+		addi t0, t0, 1 #adiciona 1 no contador 
+		
+		bge t0, a1, endprog # cont>=i
+		
+		addi t1, t1, 1 #adiciona no ponteiro 
+		
+		j loop_tu
+first_letter:
+	add t0, t0, zero #iterador do loop
+	add t1, s2, zero #endereço string
+	
+	#espaço
+	li a2, 32
+	
+    	li t0, 0         # Iterador do loop (i).
+    	#li t1, 0         # Endereço do caractere de string atual.
+    	
+	#ponteiro 
+	lbu t2, 0(s2) #t2 = string[0]
+
+	#se for maiuscula
+	blt t2, a5, continue
+	bgt t2, a6, continue
+		#converte minuscula para maiuscula
+		addi t2, t2, -32 
+		sb t2, 0(t1) #armazena de volta no endereço
+	continue:
+		lbu t2, 0(t1) # t2 = string[i].
+		
+		#se nao for espaco
+		bne t2, a2, notspace
+		
+		lbu t2, 1(t1) # t2 = string[i].
+		
+		#se for maiuscula
+		blt t2, a5, notspace
+		bgt t2, a6, notspace
+			#converte minuscula para maiuscula
+			addi t2, t2, -32 
+			sb t2, 1(t1) #armazena de volta no endereço
+		
+	notspace:
+		addi t0, t0, 1 #adiciona 1 no contador 
+		
+		bge t0, a1, endprog # cont>=i
+		
+		addi t1, t1, 1 #adiciona no ponteiro 
+		
+		j continue
+
+	
+line: 	#quebra de linha
+	la a0, newline
+	li a7, 4
+	ecall
+	
+	jr ra
+endprog:
+	mv a0, s2
+	li a7, 4
+	ecall
+	
+	la a0, newline
+	li a7, 4
+	ecall
+	
+	# Termina o programa
+	li a7, 10  # Chama a syscall para sair
+	ecall

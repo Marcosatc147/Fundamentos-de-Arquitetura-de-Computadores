@@ -1,0 +1,207 @@
+.data
+ entrada: 	.space 100
+ newline: 	.string "\n"
+ espaco: 	.byte 32
+ 
+
+.text
+    .globl main
+
+main:
+	#lê o char para função
+	li a7, 12
+	ecall
+	
+	#coloca em t1 o char para função
+	mv t1, a0
+	
+	la a0, newline 
+	li a7, 4
+	ecall
+	
+	#lê o tamanho da string
+	li a7, 5
+	ecall
+	
+	#recebe o tamanho da string
+	mv a1, a0
+	
+	addi a1, a1, 1
+	
+	#lê a string
+	la, a0, entrada
+	li a7, 8
+	ecall
+	
+	#move a string para t0
+	mv t0, a0
+	
+	la a0, newline
+	li a7, 4
+	ecall
+	
+	#t3 = m em ascii
+	li t3, 109
+	#t4 = M em ascii
+	li t4, 77
+	#t5 = c em ascii
+	li t5, 99
+	
+	#range das maiusculas
+	li a3, 'A'
+	li a4, 'Z'
+	
+	#range das minusculas
+	li a5, 'a'
+	li a6, 'z'
+	
+	#ascii espaço vazio
+	li a1, 32
+	
+	#t6 = 64
+	li t6, 64
+	
+	#branch if
+	beq t1, t3, to_lower # = m
+	beq t1, t4, to_upper # = M
+	beq t1, t5, do_first # = c
+	
+	j endprog
+	
+to_lower:	
+	#ponteiro 
+	lbu a0, 0(t0)
+		
+	#se chega ao final da string, encerra
+	beqz a0, endprog
+	
+	#se a0 = espaço vazio
+	beq a0, a1, space
+	
+	#se for minuscula
+	blt a0, a3, especial
+	bgt a0, a4, especial
+	
+	#se caractere especial
+	ble a0, t6, especial
+	
+	#converte maiuscula para minuscula
+	addi a0, a0, 32 
+	li a7, 11
+	ecall
+	
+	beq t1, t5, do_first # = c
+	
+	j itera
+	
+to_upper:	
+	#ponteiro 
+	lbu a0, 0(t0)
+	
+	li t2, 32
+		
+	#se chega ao final da string, encerra
+	beqz a0, endprog
+	
+	#se a0 = espaço vazio
+	beq a0, a1, space
+	
+	#se for maiuscula
+	blt a0, a5, especial
+	bgt a0, a6, especial
+	
+	#se caractere especial
+	ble a0, t6, especial
+	
+	#converte minuscula para maiuscula
+	sub a0, a0, t2
+	li a7, 11
+	ecall
+	
+	j itera
+	
+do_first:
+	#ponteiro 
+	lbu a0, 0(t0)
+	
+	li t2, 32
+	
+	#se chega ao final da string, encerra
+	beqz a0, endprog
+	
+	#se caractere especial
+	ble a0, t6, especial
+	
+	#se for maiuscula
+	blt a0, a5, is_upper
+	bgt a0, a6, is_upper
+	
+	#converte primeira letra minuscula para maiuscula
+	sub a0, a0, t2
+	li a7, 11
+	ecall
+	
+while:	
+	#ponteiro 
+	lbu a0, 1(t0)
+	
+	#itera
+	addi t0, t0, 1
+	
+	is_upper:
+	
+	#se a0>t2 
+	bgt a0, t2, print
+	
+	#se espaco vazio
+	beq a0, a1, space
+	
+	#se caractere especial
+	ble a0, t6, especial
+	
+	j itera
+	
+	#j do_first
+
+print:
+	#print char
+	li a7, 11
+	ecall
+	
+	j while
+especial:
+	#print char
+	li a7, 11
+	ecall
+	
+itera:
+	#itera o ponteiro
+	addi t0, t0, 1
+	
+	#branch if
+	beq t1, t3, to_lower # = m
+	beq t1, t4, to_upper # = M
+	beq t1, t5, do_first # = c
+	
+space:
+	#printa espaço
+	lb a0, espaco
+	li a7, 11
+	ecall
+	
+	#itera
+	addi t0, t0, 1
+	
+	#branch if
+	beq t1, t3, to_lower # = m
+	beq t1, t4, to_upper # = M
+	beq t1, t5, do_first # = c
+	
+endprog:
+	la a0, newline
+	li a7, 4
+	ecall
+	
+	# Termina o programa
+	li a7, 10  # Chama a syscall para sair
+	ecall

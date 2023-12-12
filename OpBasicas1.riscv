@@ -1,0 +1,147 @@
+.data
+soma:	.asciz "\nADD: "
+subt:	.asciz "\nSUB: "
+xorr: 	.asciz "\nXOR: "
+andd: 	.asciz "\nAND: "
+orr: 	.asciz "\nOR: "
+msk: 	.asciz "\nMASK: "
+sll1: 	.asciz "\nSLL("
+srl1: 	.asciz "\nSRL("
+fnm: 	.asciz "): "
+newline: .asciz "\n"
+
+
+.text
+main:
+    li a7, 5            # Solicitar entrada para o primeiro número
+    ecall
+
+    # Salvar o primeiro número em um registrador (por exemplo, t0)
+    mv t0, a0
+
+    li a7, 5            # Solicitar entrada para o segundo número
+    ecall
+
+    # Salvar o segundo número em um registrador (por exemplo, t1)
+    mv t1, a0
+    
+    li a7, 5 		#Solicitar entrada para o terceiro numero 
+    ecall
+    
+    #salvar o terceiro numero em um registrador(t2)
+    mv t2, a0
+
+    # Somar os números nos registradores t0 e t1
+    la a0, soma
+    li a7, 4		
+    ecall
+    
+    add a0, t0, t1
+    
+    li a7, 1            # Imprimir o resultado
+    ecall
+    
+    # Subtrair os numeros nos registradores t0 e t1
+    la a0, subt
+    li a7, 4		
+    ecall
+    
+    sub a0, t0, t1
+    li a7, 1            # Imprimir o resultado
+    ecall
+    
+    #and nos numeros nos registradores t0 e t1
+    la a0, andd
+    li a7, 4
+    ecall
+    
+    and a0, t0, t1
+    li a7, 1 #imprimir resultado
+    ecall
+    
+    #or nos numeros nos regs t0 e t1
+    la a0, orr
+    li a7, 4
+    ecall
+    
+    or a0, t0, t1
+    li a7, 1 #imprimir resultado
+    ecall
+    
+    # xor nos numeros nos registradores t0 e t1
+    la a0, xorr
+    li a7, 4
+    ecall
+    
+    xor a0, t0, t1
+    li a7, 1 #imprimir resultado
+    ecall
+    
+    # mascara entre t2 e 31
+    la a0, msk
+    li a7, 4
+    ecall 
+    
+    li t3, 31 #operacao de mascara
+    and t2, t2, t3
+    
+    li a7, 1 #imprimir resultado
+    mv a0, t2
+    ecall
+    
+    la a0, sll1
+    li a7, 4
+    ecall
+    
+    # Fazer a máscara entre 'c' e 31 e armazena o resultado em a0
+    li t3, 31
+    and t2, t2, t3
+    
+    # Imprimir o resultado da máscara
+    li a7, 1
+    mv a0, t2
+    ecall
+    
+    la a0, fnm
+    li a7, 4
+    ecall
+    
+    # Deslocar 'a' à esquerda por 'c' bits e armazena o resultado em a0
+    sll a0, t0, t2
+
+    # Imprimir o resultado do deslocamento à esquerda
+    li a7, 1
+    ecall
+    
+    #
+    la a0, srl1
+    li a7, 4
+    ecall
+    
+    # Fazer a máscara entre 'c' e 31 e armazena o resultado em a0
+    li t3, 31
+    and t2, t2, t3
+
+    # Imprimir o resultado da máscara
+    li a7, 1
+    mv a0, t2
+    ecall
+    
+    #
+    la a0, fnm
+    li a7, 4
+    ecall 
+    
+    # Deslocar 'b' à direita por 'c' bits e armazena o resultado em a0
+    srl a0, t1, t2
+
+    # Imprimir o resultado do deslocamento à direita
+    li a7, 1
+    ecall
+    
+    la a0, newline
+    li a7, 4
+    ecall
+    
+    li a7, 10           # Encerrar o programa
+    ecall

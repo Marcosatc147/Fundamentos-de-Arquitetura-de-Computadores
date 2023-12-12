@@ -1,0 +1,68 @@
+.data
+ string: 	.space 100
+ respostas: 	.space 100
+ newline: 	.asciz "\n"
+
+.text
+    .globl _start
+
+_start:
+	
+	li t2, 'm'
+	
+	li a7, 12
+	ecall
+	
+	mv a0, t3
+	
+	# Lê o inteiro n
+	li a7, 5
+	ecall
+	
+	#a1 é o registrador que recebe o tamanho da string por padrao    
+	addi a1, a0, 1 # a1 = a0 + 1
+	
+	# Lê a string 
+	la a0, string
+	li a7, 8
+	ecall
+	
+	#seta t0 com a string em a0
+	mv t0, a0
+	
+	beq t2, t3, for
+	j endprog
+	
+	la a0, newline
+	li a7, 4
+	ecall
+	
+for:	
+	#ponteiro na posição 0
+	lb a0, 0(t0)
+	
+	#se chega no final da string, encerra
+	beqz a0, endprog 
+	
+	#if t0 = t1 goto count
+	beq
+	
+continue_loop:
+	# senao, desloca o ponteiro e continua
+	addi t0, t0, 1
+	j for
+		
+convert: 
+	#deslocamento
+	addi t0, t0, 1
+	j for
+	
+endprog:
+	
+	la a0, newline
+	li a7, 4
+	ecall
+	
+	# Termina o programa
+	li a7, 10  # Chama a syscall para sair
+	ecall
